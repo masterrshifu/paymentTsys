@@ -1,0 +1,54 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta name="referrer" content="origin" /></head>
+<!-- <script src="https://stagegw.transnox.com/transit-tsep-web/jsView/88700000035204?8dbf57a0cb9d66b5f67f558ca89989c09a41128458073304f8b49eeedb8179b7e779d36a3a194687d6d10a41292ab475e676d489674284a2bc1b91379bf159905929d795"></script> -->
+<script th:src="@{'https://stagegw.transnox.com/transit-tsep-web/jsView/88700000035204?' + ${dynamicValue1}}">
+</script>
+<script>
+    let data;
+    function tsepHandler(eventType, event) {
+     console.log("Response code: " + event.responseCode + "Message: " + event.message + "Token: " + event.tsepToken);
+     console.log(JSON.stringify(event));
+     data = event;
+
+    }
+
+    function callAPI() {
+
+        console.log("API calling...");
+        fetch("http://localhost:9191/getTSEPToken", {
+        method: "POST",
+        body: JSON.stringify({
+            responseCode: data.responseCode,
+            status: data.status,
+            message: data.message,
+            tsepToken: data.tsepToken,
+            transactionID: data.transactionID,
+            cvv2: data.cvv2,
+            cardHolderName: data.cardHolderName
+
+        }),
+        headers: {
+            "Content-type": "application/json; charset=UTF-8"
+        }
+     }).then(response => response.json())
+    .then(json => document.getElementById('apiResponse').innerText = JSON.stringify(json));
+
+         event.preventDefault();
+
+
+
+    }
+
+</script>
+<body>
+<form method="POST" id="payment-form">
+    <div id="tsep-cardNumDiv" data-auto-formatting="Y" data-validate-cc="Y" data-detect-card-type="Y"></div>
+    <div id="tsep-datepickerDiv" data-validate-expiry-date="Y"></div>
+    <div id="tsep-cvv2Div" data-validate-cvv2="Y"></div>
+    <div id="tsep-cardHolderNameDiv" data-validate-name="Y"></div>
+    <div id="tsep-zipCodeDiv" data-validate-zipcode="Y"></div>
+    <button type="submit" onclick="callAPI()">Submit</button>
+</form>
+<div id="apiResponse"></div>
+</body>
+</html>
